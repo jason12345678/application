@@ -40,4 +40,6 @@ public:
 	CLocalState m_LocalState;
 	afx_msg void OnBnClickedButton3();
 	afx_msg void OnBnClickedStopSrv();
+	afx_msg void OnBnClickedBtnscan();
+	afx_msg void OnBnClickedRestart();
 };

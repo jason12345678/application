@@ -39,6 +39,8 @@ BEGIN_MESSAGE_MAP(SmartSharingDlg1, CDialog)
 	ON_COMMAND(ID_STOPSERVICE, &SmartSharingDlg1::OnStopservice)
 	ON_BN_CLICKED(IDC_BUTTON3, &SmartSharingDlg1::OnBnClickedButton3)
 	ON_BN_CLICKED(DC_STOP_SRV, &SmartSharingDlg1::OnBnClickedStopSrv)
+	ON_BN_CLICKED(IDC_BTNSCAN, &SmartSharingDlg1::OnBnClickedBtnscan)
+	ON_BN_CLICKED(IDC_RESTART, &SmartSharingDlg1::OnBnClickedRestart)
 END_MESSAGE_MAP()
 
 
@@ -142,6 +144,18 @@ void SmartSharingDlg1::OnBnClickedButton3()
 
 
 void SmartSharingDlg1::OnBnClickedStopSrv()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void SmartSharingDlg1::OnBnClickedBtnscan()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void SmartSharingDlg1::OnBnClickedRestart()
 {
 	// TODO: Add your control notification handler code here
 }
