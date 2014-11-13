@@ -17,7 +17,7 @@ void trace( const char *fmt,...)
 	if(!g_bDebug)
 		return;
 
-	if( (log_fp = fopen("asav_sample.log","a+")) == NULL  ){
+	if( (log_fp = fopen("c:\\asav_sample.log","a+")) == NULL  ){
 		perror("open c:\\asav_sample.log err");
 		return ;
 	}

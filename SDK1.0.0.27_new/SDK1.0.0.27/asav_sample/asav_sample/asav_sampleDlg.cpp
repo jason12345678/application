@@ -5,6 +5,11 @@
 #include "asav_sample.h"
 #include "asav_sampleDlg.h"
 #include "log.h"
+#include <wbemidl.h>
+#include <Wbemcli.h>
+#include <comdef.h>
+#pragma comment(lib,"Wbemuuid.lib")  
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,6 +22,8 @@ int g_bDebug = 0;
 // CAboutDlg dialog used for App About
 
 int getinfo(LPTSTR buf);
+HRESULT GetProcessPath(const CString& strExeFile, CString& strPath, BOOL& bFound);
+CString GetDescriptionFromPath(CString IDEPath);
 
 class CAboutDlg : public CDialog
 {
@@ -68,7 +75,7 @@ Casav_sampleDlg::Casav_sampleDlg(CWnd* pParent /*=NULL*/)
 	}
 	//trace("name=%s",str);
 
-	trace("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+	
 
 }
 
@@ -1126,8 +1133,35 @@ void Casav_sampleDlg::PopulateList()
 	}
 }
 
+void WriteLog(LPCTSTR logName, CString msg)
+{
+    try
+    {
+        //设置文件的打开参数
+        CStdioFile outFile(logName, CFile::modeNoTruncate | CFile::modeCreate | CFile::modeWrite | CFile::typeText);
+        CString msLine;
+        CTime tt = CTime::GetCurrentTime();
+
+        //作为Log文件，经常要给每条Log打时间戳，时间格式可自由定义，
+        //这里的格式如：2010-June-10 Thursday, 15:58:12
+        msLine += msg;
+        msLine += "\n";
+
+        //在文件末尾插入新纪录
+        outFile.SeekToEnd();
+        outFile.WriteString( msLine );
+        outFile.Close();
+    }
+    catch(CFileException *fx)
+    {
+        fx->Delete();
+    }
+}
+
+
 int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 {
+	CString logName = CString("C:\\aa.log");
 	HANDLE hProcess;
 	int index=0;
 	BOOL bProcessEnd=FALSE;
@@ -1135,6 +1169,8 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 	DWORD err;
 	CString strModuleName =_T("");
 	TCHAR szModuleName[MAX_PATH];
+	
+  //  _tmemset(szModuleName,0,MAX_PATH);
 
 
 
@@ -1149,11 +1185,61 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 	err=GetLastError();
 	while(bProcessEnd)
 	{
-		_tcsncpy(ProcessList[index].proc_name, pInfo->szExeFile,_tcsnlen(pInfo->szExeFile,MAX_PATH)+1);//_tcsnlen(pinfo->szExeFile,MAX_PATH),
+			_tcsncpy(ProcessList[index].proc_name, pInfo->szExeFile,_tcsnlen(pInfo->szExeFile,MAX_PATH)+1);//_tcsnlen(pinfo->szExeFile,MAX_PATH),
 
 
-		ProcessList[index].pid = pInfo->th32ProcessID;
+			ProcessList[index].pid = pInfo->th32ProcessID;
 
+		
+		
+			CString strPath;
+			BOOL bFound = false;
+			CString filepath;
+			CString desc;
+			int len ;
+			int result =0;
+			CString strExeFile = CString(ProcessList[index].proc_name);
+			if(ProcessList[index].pid !=4 && ProcessList[index].pid !=0){
+
+				GetProcessPath(strExeFile,  strPath, bFound);
+				if(bFound){
+				//	filepath = strPath;
+				//desc = GetDescriptionFromPath(strPath);
+					_tcsncpy_s(szModuleName, strPath.GetBuffer(strPath.GetLength()),strPath.GetLength());
+					szModuleName[strPath.GetLength()]='\0';
+					result = getinfo(szModuleName);
+					if(result ==0){
+							
+						_tcsncpy(ProcessList[index].info, ProcessList[index].proc_name,MAX_PATH);
+					}else{
+						 len = _tcslen(szModuleName);
+						_tcsncpy(ProcessList[index].info, szModuleName,len);
+						ProcessList[index].info[len] ='\0';
+					}
+
+				}else{
+
+					_tcsncpy(ProcessList[index].info, ProcessList[index].proc_name,MAX_PATH);
+				}
+
+	
+			}else if(ProcessList[index].pid==0){
+	
+						_tcscpy(ProcessList[index].info, _T("System Idle Process"));
+						ProcessList[index].info[_tcslen(_T("System Idle Process"))]='\0';
+				
+				
+
+			}else if(ProcessList[index].pid==4){
+		
+						_tcscpy(ProcessList[index].info, _T("System"));
+					ProcessList[index].info[_tcslen(_T("System"))]='\0';
+			}
+
+			
+	
+
+			/*
 		GetProcessName(ProcessList[index].proc_name,pInfo->th32ProcessID,szModuleName,MAX_PATH);
 
 		if(CString(_T("unknown(OpenProcess error)")) ==CString(szModuleName)){
@@ -1171,6 +1257,8 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 
 
 		}
+		*/
+		
 
 
 
@@ -1192,6 +1280,10 @@ void Casav_sampleDlg::GetProcessName(LPTSTR name,DWORD processid,LPTSTR buf,int 
 {
 	try
 	{
+		CString strPath;
+		CString strExeFile(name);
+		CString desc;
+		 BOOL bFound = false;
 		//make   sure   buf   is   valid   and   long   enough
 		if(buf==NULL||len <=0)
 			return;
@@ -1207,11 +1299,16 @@ void Casav_sampleDlg::GetProcessName(LPTSTR name,DWORD processid,LPTSTR buf,int 
 			return;
 		}
 		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ,false,processid);
-		if(hProcess   ==NULL)
+		if(hProcess ==NULL)
 		{
 			//_tcscpy(buf, _T("unknown(OpenProcess error)"));
 			_tcscpy(buf, name);
 			getinfo(buf);
+			/*
+			GetProcessPath(strExeFile,  strPath, bFound);
+			desc = GetDescriptionFromPath(strExeFile);
+			_tcscpy(buf, desc.GetBuffer(desc.GetLength()));
+			*/
 			return;
 		}
 		HMODULE   hModule;
@@ -1221,8 +1318,12 @@ void Casav_sampleDlg::GetProcessName(LPTSTR name,DWORD processid,LPTSTR buf,int 
 		{
 			DWORD   dwret=GetModuleFileNameEx(hProcess, hModule, buf, len);
 
-			//GetModuleBaseName(hProcess,hModule,buf,len);
-			getinfo(buf);
+			GetModuleBaseName(hProcess,hModule,buf,len);
+			/*
+			GetProcessPath(strExeFile,  strPath, bFound);
+			desc = GetDescriptionFromPath(strPath);
+			_tcscpy(buf, desc.GetBuffer(desc.GetLength()));
+			*/
 		}
 		else{
 
@@ -1240,6 +1341,154 @@ void Casav_sampleDlg::GetProcessName(LPTSTR name,DWORD processid,LPTSTR buf,int 
 
 	}
 
+}
+
+HRESULT GetProcessPath(const CString& strExeFile, CString& strPath, BOOL& bFound)
+{
+	HRESULT hr;
+	
+	hr =  CoInitializeEx(0, COINIT_MULTITHREADED); 
+	if (FAILED(hr))
+    {
+		AfxMessageBox(_T("Failed to initialize COM library. Error code = 0x"));
+		return hr;                  // Program has failed.
+    }
+
+	bFound = FALSE;
+	// initialize the IWbemLocator interface
+	IWbemLocator *pLoc = NULL;
+	hr = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
+	if(FAILED(hr))
+	{
+		CoUninitialize();
+		return hr;
+	}
+	// create a connection to WMI namespace.
+	IWbemServices *pSvc = NULL;
+	hr = pLoc->ConnectServer(bstr_t("ROOT\\CIMV2"), 
+		NULL, NULL, 0, NULL, 0, 0, &pSvc);
+	if(FAILED(hr))
+	{
+		pLoc->Release();
+		CoUninitialize();
+		return hr;
+	}
+	// set security levels on the proxy
+	hr = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
+		NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+	if(FAILED(hr))
+	{
+		pSvc->Release();
+		pLoc->Release();     
+		CoUninitialize();
+		return hr;
+	}
+	// do query
+	IEnumWbemClassObject* pEnum = NULL;
+	hr = pSvc->ExecQuery(bstr_t("WQL"), 
+		bstr_t("SELECT Name, ExecutablePath FROM Win32_Process"),
+		WBEM_FLAG_FORWARD_ONLY|WBEM_FLAG_RETURN_IMMEDIATELY, 
+		NULL,
+		&pEnum);
+
+	if(FAILED(hr))
+	{
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return hr;
+	}
+	// get each processes enumeration
+	IWbemClassObject *pclsObj;
+	ULONG uReturn = 0;
+	while(pEnum)
+	{
+		pEnum->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+		if(0 == uReturn)
+			break;
+
+		// get properties values
+		VARIANT vtName;
+		int result = pclsObj->Get(L"Name", 0, &vtName, 0, 0);
+		int dwError;
+		dwError = GetLastError();
+		if(!strExeFile.CompareNoCase(vtName.bstrVal))
+		{
+			VARIANT vtExecutablePath;
+			dwError = GetLastError();
+			if(CString(vtName)==CString("smss.exe")){
+				bFound = FALSE;
+				break;
+			}
+			pclsObj->Get(L"ExecutablePath", 0, &vtExecutablePath, 0, 0);
+			if(vtExecutablePath.bstrVal ==NULL)
+			{
+				strPath = "";
+			}
+			dwError = GetLastError();
+			printf("dwError=%d\n",dwError);
+			strPath =  COLE2T(vtExecutablePath.bstrVal);
+			
+			VariantClear(&vtExecutablePath);
+			bFound = TRUE; // successfully found
+			break;
+		}
+		VariantClear(&vtName);
+	}
+	// cleanup
+	pclsObj->Release();
+	pEnum->Release();
+	pSvc->Release();
+	pLoc->Release();  
+	CoUninitialize();
+	return hr;
+}
+CString GetDescriptionFromPath(CString IDEPath)
+{
+    DWORD   dwLen = 0;
+    TCHAR*  lpData = NULL;
+	CString Ret;
+	LPVOID  lpBuffer = NULL;
+    UINT    uLen = 0;
+	UINT    i;
+	BOOL    bSuccess;
+	struct  LANGANDCODEPAGE {
+		      WORD wLanguage;
+		      WORD wCodePage;
+	        } *lpTranslate;
+
+    dwLen = GetFileVersionInfoSize(IDEPath, 0);
+    if (0 == dwLen)
+        return CString(_T(""));
+
+    lpData =new TCHAR [dwLen+1];
+
+    if(!GetFileVersionInfo(IDEPath, 0, dwLen, lpData))
+    {
+        delete lpData;
+        return CString(_T(""));
+    }
+	
+	// Read the list of languages and code pages.
+	VerQueryValue(lpData, 
+				  TEXT("\\VarFileInfo\\Translation"),
+				  (LPVOID*)&lpTranslate,
+				  &uLen);
+	for( i = 0; i < (uLen/sizeof(struct LANGANDCODEPAGE)); i++ )
+	{
+		CString Trans;
+		
+		Trans.Format(_T("\\StringFileInfo\\%04x%04x\\FileDescription"), lpTranslate[i].wLanguage, lpTranslate[i].wCodePage);
+		
+		// Retrieve file description for language and code page "i". 
+		bSuccess = VerQueryValue(lpData, (LPWSTR)(LPCTSTR)Trans, &lpBuffer, &uLen);
+
+		if (bSuccess)
+			Ret = (TCHAR*)lpBuffer;
+	}
+
+    delete [] lpData;
+    return Ret;
 }
 
 int getinfo(LPTSTR buf)
@@ -1332,7 +1581,13 @@ int getinfo(LPTSTR buf)
 	{
 		printf("File Description: %s", Buffer);
 
-		_tcscpy(buf, Buffer);
+			int len = _tcslen(Buffer);
+		//	_tcsncpy(ProcessList[index].info, szModuleName,len);
+			
+
+	//	_tcscpy(buf, Buffer);
+		_tcsncpy(buf, Buffer,len);
+		buf[len] ='\0';
 
 	}
 
