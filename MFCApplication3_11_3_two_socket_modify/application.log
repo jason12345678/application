@@ -2572,3 +2572,30 @@
 2014-11-16 23:43:14,enter begin to addclient
 2014-11-16 23:43:14,leave the    addclient
 2014-11-16 23:43:20,enter the server send file
+2014-11-17 04:45:42,connect to server msg
+2014-11-17 04:45:54,enter begin to addclient
+2014-11-17 04:45:54,leave the    addclient
+2014-11-17 05:10:18,connect to server msg
+2014-11-17 05:10:19,enter begin to addclient
+2014-11-17 05:10:19,leave the    addclient
+2014-11-17 05:10:22, ack   disconnet the message 
+2014-11-17 05:10:25,enter the delClient
+2014-11-17 05:10:25,leave the delClient
+2014-11-17 05:10:33,connect to server msg
+2014-11-17 05:10:34,enter begin to addclient
+2014-11-17 05:10:34,leave the    addclient
+2014-11-17 05:10:41,enter the delClient
+2014-11-17 05:10:41,leave the delClient
+2014-11-17 05:10:51,connect to server msg
+2014-11-17 05:10:56,enter begin to addclient
+2014-11-17 05:10:56,leave the    addclient
+2014-11-17 05:11:16,enter the delClient
+2014-11-17 05:11:16,leave the delClient
+2014-11-17 05:13:01,connect to server msg
+2014-11-17 05:13:02,enter begin to addclient
+2014-11-17 05:13:02,leave the    addclient
+2014-11-17 05:14:05,begin to scan
+2014-11-17 05:14:05,Scan the device nearby, please waiting ....
+2014-11-17 05:14:12,finish the scan.
+2014-11-17 05:14:13,begin to connect the server
+2014-11-17 05:14:19,ack connect server
