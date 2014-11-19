@@ -15,6 +15,13 @@
 #define new DEBUG_NEW
 #endif
 
+#define MIN_AVAILABLE_BAND_WIDTH 2000 /* 2M */
+#define MAX_HIGH_PRIO_PROC_COUNT 10
+#define MIN_HIGH_PRIO_PROC_COUNT 1
+#define PRIO_HIGH 1
+#define PRIO_LOW 0
+
+int high_prio_proc_count = 0; // High priority process count in the list
 int PRIO_LVE = 0;
 int PRE_LVE = 0;
 
@@ -153,7 +160,7 @@ BOOL Casav_sampleDlg::OnInitDialog()
 	TCHAR caption[MAX_PATH];
 	//GetWindowText(caption, _countof(caption));
 	// _tcscat_s(caption, _countof(caption), SDK_VERSION);
-	SetWindowText(_T("Newtork Manager"));
+	SetWindowText(_T("BandWidthManager"));
 
 	// Add item in right list control
 	RECT rect;
@@ -933,6 +940,7 @@ void Casav_sampleDlg::OnBnClickedBtnRefresh()
 void Casav_sampleDlg::AutoPrioSet()
 {
 	// TODO: Add your control notification handler code here
+/*
 	int      i;
 	CString  proc_name;
 	CString  level;
@@ -1003,6 +1011,54 @@ void Casav_sampleDlg::AutoPrioSet()
 
 	if (PRIO_LVE < 4)
 		PRIO_LVE++;
+*/
+	int i = 0;
+	if (0 == high_prio_proc_count)
+	{
+		m_smart_net->clearall_prio();
+		m_smart_net->set_proc_prio(m_list_bw.GetItemText(0, LIST_PROCESS), PRIO_HIGH);
+		m_smart_net->apply_prio_list();
+		m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));	
+		high_prio_proc_count++;
+	}
+	//Set a timer to monitor current available rx bw if bw is > 2M add second app to high priority list
+	if (m_smart_net->get_rx_available_bw() > MIN_AVAILABLE_BAND_WIDTH)
+	{
+		
+		if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT > high_prio_proc_count))
+		{
+			high_prio_proc_count++;	
+			if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+			{
+				m_smart_net->clearall_prio();
+				for (i=0; i<high_prio_proc_count; i++)
+				{
+					m_smart_net->set_proc_prio(m_list_bw.GetItemText(i, LIST_PROCESS), PRIO_HIGH);
+					m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));
+				}
+				m_smart_net->apply_prio_list();
+			}
+		}
+	}
+	// Available band width is less than MIN_AVAILABLE_BAND_WIDTH
+	else  
+	{
+		if ((MIN_HIGH_PRIO_PROC_COUNT < high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+		{
+			high_prio_proc_count--;
+
+			if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && ( MIN_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+			{
+				m_smart_net->clearall_prio();
+				for (i=0; i<high_prio_proc_count; i++)
+				{
+					m_smart_net->set_proc_prio(m_list_bw.GetItemText(i, LIST_PROCESS), PRIO_HIGH);
+					m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));
+				}
+				m_smart_net->apply_prio_list();
+			}
+		}
+	}
 }
 
 void Casav_sampleDlg::UpdateAllItems()
