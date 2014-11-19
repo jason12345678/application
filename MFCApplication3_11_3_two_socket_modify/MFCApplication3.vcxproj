@@ -14,7 +14,6 @@
     <ProjectGuid>{69280F90-5FB8-4B11-8630-301E7EFB7CFE}</ProjectGuid>
     <RootNamespace>MFCApplication3</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <ProjectName>SmartSharing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -160,23 +159,17 @@
     <Image Include="C:\Users\Administrator\Desktop\icon\main.bmp" />
     <Image Include="res\3-img2ico.net.ico" />
     <Image Include="res\4-img2ico.net.ico" />
-    <Image Include="res\4.jpg" />
     <Image Include="res\5-img2ico.net.ico" />
     <Image Include="res\6-img2ico.net.ico" />
     <Image Include="res\7-img2ico.net.ico" />
     <Image Include="res\8-img2ico.net.ico" />
-    <Image Include="res\8.ico" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\bitmap2.bmp" />
     <Image Include="res\computer.bmp" />
     <Image Include="res\computer.ico" />
     <Image Include="res\icon1.ico" />
-    <Image Include="res\icon8.ico" />
-    <Image Include="res\icon9.ico" />
     <Image Include="res\main.bmp" />
     <Image Include="res\MFCApplication3.ico" />
-    <Image Include="res\SmarSharing.ico" />
-    <Image Include="res\SmartSharing.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

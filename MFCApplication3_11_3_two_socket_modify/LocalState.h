@@ -12,10 +12,6 @@ public:
     void GoToConnected(CString SSID);
 	void GotoDisconnect();
 	void GotoServiceRun();
-	void GotoSendFileWaitAck();
-	void GotoSendFileAckCancel();
-	void GotoSendFileAckOK();
-	void GotoSendFileAckEnd();
     STATE GetCurrentState();
     CString GetConnectedSSID();
 	void SetParent(LPVOID);

@@ -98,33 +98,6 @@ void CLocalState::GotoDisconnect()
 
 }
 
-void CLocalState::GotoSendFileWaitAck()
-{
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_DISCONNECT)->EnableWindow(false);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILE)->EnableWindow(false);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILECANCEL)->EnableWindow(false);
-}
-void CLocalState::GotoSendFileAckCancel()
-{
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_DISCONNECT)->EnableWindow(true);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILE)->EnableWindow(true);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILECANCEL)->EnableWindow(false);
-}
-
-void CLocalState::GotoSendFileAckOK()
-{
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_DISCONNECT)->EnableWindow(false);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILE)->EnableWindow(false);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILECANCEL)->EnableWindow(false);
-}
-
-void CLocalState::GotoSendFileAckEnd()
-{
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_DISCONNECT)->EnableWindow(true);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILE)->EnableWindow(true);
-	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(ID_MENU_SENDFILECANCEL)->EnableWindow(false);
-}
-
 void CLocalState::GotoServiceRun()
 {
 	if(LocalState ==  SERVICERUN)

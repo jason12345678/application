@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="BandWidthManager"
+	Name="asav_sample"
 	ProjectGUID="{23D8EDB9-0279-4DC2-8FDC-206E99EE6F42}"
 	RootNamespace="asav_sample"
 	Keyword="MFCProj"
@@ -20,7 +20,6 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="C:\Users\wqj\Documents\BandWidthManager.vsprops"
 			UseOfMFC="1"
 			CharacterSet="1"
 			>
@@ -107,7 +106,6 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="C:\Users\wqj\Documents\BandWidthManager.vsprops"
 			UseOfMFC="1"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -197,7 +195,6 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="C:\Users\wqj\Documents\BandWidthManager.vsprops"
 			UseOfMFC="1"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -284,10 +281,7 @@
 		</Configuration>
 		<Configuration
 			Name="x64|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="C:\Users\wqj\Documents\BandWidthManager.vsprops"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"

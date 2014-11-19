@@ -83,7 +83,7 @@ BOOL SmartSharingDlg1::OnInitDialog()
 	m_button4.SetAlign(CCeButtonST::ST_ALIGN_VERT);
 	m_button4.SetMenu(IDR_MENU6, m_hWnd);
 
-	m_LocalState.GotoDisconnect();
+
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 
@@ -121,20 +121,7 @@ void SmartSharingDlg1::OnScanpeers()
 void SmartSharingDlg1::OnStartBandWidth()
 {
 	// TODO: 在此添加命令处理程序代码
-	HWND hPreWnd;
-    if (hPreWnd = ::FindWindow(NULL, _T("BandWidthManager")))
-    {
-		/*
-        if (IsIconic(hPreWnd))  // IsIconic: Is Minisized? IsZoomed: Is Maxisized?
-         {
-            ::ShowWindow( hPreWnd, SW_SHOWNORMAL );
-            theApp.SetForegroundWindow(hPreWnd);
-        }
-		*/
-		AfxMessageBox(_T("asav has exist."));
-		return;
-    }
-	ShellExecute(NULL, L"open", L"BandWidthManager.exe", L"", L"", SW_HIDE);
+	ShellExecute(NULL, L"open", L"asav_sample.exe", L"", L"", SW_HIDE);
 }
 
 
