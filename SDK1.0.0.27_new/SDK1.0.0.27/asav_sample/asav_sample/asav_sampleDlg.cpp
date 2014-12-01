@@ -497,18 +497,23 @@ void Casav_sampleDlg::RefreshListBw(PROCESS* process, int count)
 		if(j>=0)
 			continue;
 
-		_itot_s(process[i].pid, str2, 10);
-		m_list_bw.InsertItem(k, str2);
+		if(_tcsstr(process[i].info,_T(".exe"))==NULL){
 
-		_stprintf_s(str3, 32, _T("%d"), k);
-		m_list_bw.SetItemText(k, LIST_COUNT, str3);
-		m_list_bw.SetItemText(k, LIST_PROCESS, process[i].proc_name);
-		m_list_bw.SetItemText(k, LIST_NAME, process[i].info);
+			
 
-		m_list_bw.SetItemText(k, LIST_TX_BW, _T("0"));
-		m_list_bw.SetItemText(k, LIST_RX_BW, _T("0"));
-		m_list_bw.SetItemText(k, LIST_PRIO, _T("None"));
-		k++;
+
+			_itot_s(process[i].pid, str2, 10);
+			m_list_bw.InsertItem(k, str2);
+			_stprintf_s(str3, 32, _T("%d"), k);
+			m_list_bw.SetItemText(k, LIST_COUNT, str3);
+			m_list_bw.SetItemText(k, LIST_PROCESS, process[i].proc_name);
+			m_list_bw.SetItemText(k, LIST_NAME, process[i].info);
+
+			m_list_bw.SetItemText(k, LIST_TX_BW, _T("0"));
+			m_list_bw.SetItemText(k, LIST_RX_BW, _T("0"));
+			m_list_bw.SetItemText(k, LIST_PRIO, _T("None"));
+			k++;
+		}
 	}
 }
 
@@ -1212,9 +1217,26 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 							
 						_tcsncpy(ProcessList[index].info, ProcessList[index].proc_name,MAX_PATH);
 					}else{
-						 len = _tcslen(szModuleName);
-						_tcsncpy(ProcessList[index].info, szModuleName,len);
-						ProcessList[index].info[len] ='\0';
+										 len = _tcslen(szModuleName);
+						 
+						 if(_tcsncmp(szModuleName,_T("smss.exe"),_tcslen(_T("smss.exe")))==0){
+
+									_tcsncpy(ProcessList[index].info, _T("Windows Session Manager"),_tcslen(_T("Windows Session Manager")));
+									ProcessList[index].info[len] ='\0';
+						 }else if(_tcsncmp(szModuleName,_T("csrss.exe"),_tcslen(_T("csrss.exe")))==0){
+
+									_tcsncpy(ProcessList[index].info, _T("Client Server Runtime Process"),_tcslen(_T("Client Server Runtime Process")));
+									ProcessList[index].info[len] ='\0';
+
+						 }else if(_tcsncmp(szModuleName,_T("services.exe"),_tcslen(_T("services.exe")))==0){
+
+									_tcsncpy(ProcessList[index].info, _T("Services and Controller app"),_tcslen(_T("Services and Controller app")));
+									ProcessList[index].info[len] ='\0';
+						 }else{
+						 
+							_tcsncpy(ProcessList[index].info, szModuleName,len);
+							ProcessList[index].info[len] ='\0';
+						 }
 					}
 
 				}else{
