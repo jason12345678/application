@@ -15,6 +15,13 @@
 #define new DEBUG_NEW
 #endif
 
+#define MIN_AVAILABLE_BAND_WIDTH 2000 /* 2M */
+#define MAX_HIGH_PRIO_PROC_COUNT 10
+#define MIN_HIGH_PRIO_PROC_COUNT 1
+#define PRIO_HIGH 1
+#define PRIO_LOW 0
+
+int high_prio_proc_count = 0; // High priority process count in the list
 int PRIO_LVE = 0;
 int PRE_LVE = 0;
 
@@ -22,8 +29,145 @@ int g_bDebug = 0;
 // CAboutDlg dialog used for App About
 
 int getinfo(LPTSTR buf);
+CString trans_path(CString path);
+CString Trans(CString strPath);
+int AddPrivilege(LPCTSTR Name);
 HRESULT GetProcessPath(const CString& strExeFile, CString& strPath, BOOL& bFound);
 CString GetDescriptionFromPath(CString IDEPath);
+
+CString TransPath(CString strPath)
+{
+	CString strLogicalDes = NULL;
+
+
+	WCHAR lpBufferss[MAX_PATH] = {0};
+	CString strNeedPath = NULL;
+	::GetLogicalDriveStrings(MAX_PATH,lpBufferss);
+	for(int i=0; i<MAX_PATH; i++)
+	{
+		CString strFront(lpBufferss[i]);
+		CString strLate(lpBufferss[i+1]);
+		if(strFront==L"\0" && strLate==L"\0")
+			break;
+		else
+		{
+			if(strFront==L"\\")
+			{
+				CString strCurrent(lpBufferss[i-2]);
+				strNeedPath = strNeedPath + strCurrent;
+			}
+		}
+	}
+	strLogicalDes = strNeedPath;
+
+	CString strDevice = L"\\Device\\HarddiskVolume";
+	int iDeviceLen = strDevice.GetLength();
+	CString strTemp;
+	BOOL bFlag = false;
+	BOOL f = false;
+	for(int i=0; i<strLogicalDes.GetLength();i++)
+	{
+		CString strDes = strLogicalDes.Mid(i,1)+L":";
+		strTemp = strPath.Right( strPath.GetLength() - iDeviceLen );
+		for(int j=0; j<strTemp.GetLength(); j++)
+		{
+			if( strTemp.Mid( j, 1 ).Compare( L"\\" ) == 0 )
+			{
+				int iCount = strTemp.GetLength() - j;
+				strTemp = strDes + strTemp.Right(iCount);				
+				DWORD dwHandle;
+				if( GetFileVersionInfoSize(/*(LPTSTR)(LPCTSTR)s*/strTemp, &dwHandle) != 0 )
+				{
+					bFlag = true;
+					break;
+				}
+				else
+				{
+					strTemp = L"";
+					break;
+				}
+			}
+		}
+		if(bFlag)
+			break;
+
+	}
+	return strTemp;
+
+}
+
+CString trans_path(CString path)
+{
+	
+	if (-1 != path.Find(CString("\\Device\\HarddiskVolume1")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume1"), CString("C:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume2")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume2"), CString("D:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume3")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume3"), CString("E:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume4")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume4"), CString("F:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume5")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume5"), CString("G:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume6")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume6"), CString("H:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume7")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume7"), CString("I:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume8")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume8"), CString("J:"));
+	}
+	else if (-1 != path.Find(CString("\\Device\\HarddiskVolume9")))
+	{
+		path.Replace(CString("\\Device\\HarddiskVolume9"), CString("K:"));
+	}
+
+	// path.Replace(CString("\\"), CString("\\\\"));
+	//return path;
+	return L"a";
+}
+
+int AddPrivilege(LPCTSTR Name)
+{
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tp;
+	LUID Luid;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES|TOKEN_QUERY, &hToken))
+	{
+		return 1;
+	}
+
+	if (!LookupPrivilegeValue(NULL, Name, &Luid))
+	{
+		return 1;
+	}
+
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	tp.Privileges[0].Luid = Luid;
+
+	if (!AdjustTokenPrivileges(hToken, 0, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL))
+	{
+		return 1;
+	}
+
+	return 0;
+}
 
 class CAboutDlg : public CDialog
 {
@@ -153,7 +297,7 @@ BOOL Casav_sampleDlg::OnInitDialog()
 	TCHAR caption[MAX_PATH];
 	//GetWindowText(caption, _countof(caption));
 	// _tcscat_s(caption, _countof(caption), SDK_VERSION);
-	SetWindowText(_T("Newtork Manager"));
+	SetWindowText(_T("BandWidthManager"));
 
 	// Add item in right list control
 	RECT rect;
@@ -235,8 +379,10 @@ BOOL Casav_sampleDlg::OnInitDialog()
 	if (err != ERROR_SUCCESS)
 	{
 		szErrMsg = get_error_msg(err);
-		AfxMessageBox(szErrMsg);
+		// AfxMessageBox(szErrMsg);
+		AfxMessageBox(_T("需要的驱动文件丢失！"));
 		PostQuitMessage(0);
+		return FALSE;
 	}
 
 	m_smart_net->lock();
@@ -482,7 +628,7 @@ void Casav_sampleDlg::RefreshListBw(PROCESS* process, int count)
 	TCHAR str1[32], str2[32];
 	TCHAR str3[32];
 	CString prio;
-
+	CString tmp;
 	m_list_bw.DeleteAllItems();
 	for(int i=0, k=0;i<count;i++)
 	{
@@ -496,24 +642,23 @@ void Casav_sampleDlg::RefreshListBw(PROCESS* process, int count)
 		}
 		if(j>=0)
 			continue;
-
-		if(_tcsstr(process[i].info,_T(".exe"))==NULL){
-
-			
-
-
-			_itot_s(process[i].pid, str2, 10);
-			m_list_bw.InsertItem(k, str2);
-			_stprintf_s(str3, 32, _T("%d"), k);
-			m_list_bw.SetItemText(k, LIST_COUNT, str3);
-			m_list_bw.SetItemText(k, LIST_PROCESS, process[i].proc_name);
-			m_list_bw.SetItemText(k, LIST_NAME, process[i].info);
-
-			m_list_bw.SetItemText(k, LIST_TX_BW, _T("0"));
-			m_list_bw.SetItemText(k, LIST_RX_BW, _T("0"));
-			m_list_bw.SetItemText(k, LIST_PRIO, _T("None"));
-			k++;
+		tmp.Format(L"%s", process[i].info);
+		if (tmp.IsEmpty())
+		{
+			continue;
 		}
+		_itot_s(process[i].pid, str2, 10);
+		m_list_bw.InsertItem(k, str2);
+
+		_stprintf_s(str3, 32, _T("%d"), k);
+		m_list_bw.SetItemText(k, LIST_COUNT, str3);
+		m_list_bw.SetItemText(k, LIST_PROCESS, process[i].proc_name);
+		m_list_bw.SetItemText(k, LIST_NAME, process[i].info);
+		m_list_bw.SetItemText(k, LIST_TX_BW, _T("0"));
+		m_list_bw.SetItemText(k, LIST_RX_BW, _T("0"));
+		m_list_bw.SetItemText(k, LIST_PRIO, _T("None"));
+		
+		k++;
 	}
 }
 
@@ -922,7 +1067,7 @@ void Casav_sampleDlg::OnBnClickedBtnClear()
 
 void Casav_sampleDlg::OnBnClickedBtnRefresh()
 {
-	PROCESS AllProcess[MAX_PROCESS_COUNT];
+	PROCESS AllProcess[MAX_PROCESS_COUNT] = {0};
 	int ProcessCount=0;
 
 	trace("enter refresh button");
@@ -938,6 +1083,7 @@ void Casav_sampleDlg::OnBnClickedBtnRefresh()
 void Casav_sampleDlg::AutoPrioSet()
 {
 	// TODO: Add your control notification handler code here
+/*
 	int      i;
 	CString  proc_name;
 	CString  level;
@@ -1008,6 +1154,54 @@ void Casav_sampleDlg::AutoPrioSet()
 
 	if (PRIO_LVE < 4)
 		PRIO_LVE++;
+*/
+	int i = 0;
+	if (0 == high_prio_proc_count)
+	{
+		m_smart_net->clearall_prio();
+		m_smart_net->set_proc_prio(m_list_bw.GetItemText(0, LIST_PROCESS), PRIO_HIGH);
+		m_smart_net->apply_prio_list();
+		m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));	
+		high_prio_proc_count++;
+	}
+	//Set a timer to monitor current available rx bw if bw is > 2M add second app to high priority list
+	if (m_smart_net->get_rx_available_bw() > MIN_AVAILABLE_BAND_WIDTH)
+	{
+		
+		if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT > high_prio_proc_count))
+		{
+			high_prio_proc_count++;	
+			if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+			{
+				m_smart_net->clearall_prio();
+				for (i=0; i<high_prio_proc_count; i++)
+				{
+					m_smart_net->set_proc_prio(m_list_bw.GetItemText(i, LIST_PROCESS), PRIO_HIGH);
+					m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));
+				}
+				m_smart_net->apply_prio_list();
+			}
+		}
+	}
+	// Available band width is less than MIN_AVAILABLE_BAND_WIDTH
+	else  
+	{
+		if ((MIN_HIGH_PRIO_PROC_COUNT < high_prio_proc_count) && (MAX_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+		{
+			high_prio_proc_count--;
+
+			if ((MIN_HIGH_PRIO_PROC_COUNT <= high_prio_proc_count) && ( MIN_HIGH_PRIO_PROC_COUNT >= high_prio_proc_count))
+			{
+				m_smart_net->clearall_prio();
+				for (i=0; i<high_prio_proc_count; i++)
+				{
+					m_smart_net->set_proc_prio(m_list_bw.GetItemText(i, LIST_PROCESS), PRIO_HIGH);
+					m_list_bw.SetItemText(i, LIST_PRIO, _T("HIGH"));
+				}
+				m_smart_net->apply_prio_list();
+			}
+		}
+	}
 }
 
 void Casav_sampleDlg::UpdateAllItems()
@@ -1177,7 +1371,7 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 	
   //  _tmemset(szModuleName,0,MAX_PATH);
 
-
+	AddPrivilege(SE_DEBUG_NAME);
 
 	Info.dwSize=sizeof(PROCESSENTRY32);
 	pInfo=&Info;
@@ -1203,46 +1397,59 @@ int Casav_sampleDlg::EnumProcess(PROCESS * ProcessList, long MaxSize)
 			CString desc;
 			int len ;
 			int result =0;
+			int rst = 0;
 			CString strExeFile = CString(ProcessList[index].proc_name);
-			if(ProcessList[index].pid !=4 && ProcessList[index].pid !=0){
+			if(ProcessList[index].pid !=4 && ProcessList[index].pid !=0)
+			{
 
-				GetProcessPath(strExeFile,  strPath, bFound);
-				if(bFound){
+
+				BOOL Wow64Process;
+				wchar_t path[MAX_PATH+1];
+				HANDLE h_Process = OpenProcess(PROCESS_ALL_ACCESS ,FALSE,ProcessList[index].pid);
+				rst = GetLastError();
+				
+				//IsWow64Process(h_Process, &Wow64Process);
+			//	QueryFullProcessImageName(h_Process,0,path, pInfo);
+				if(!GetProcessImageFileName(h_Process ,path, MAX_PATH+1))
+				{ 
+					rst = GetLastError();
+					trace("Get file abs path failed.");
+					bProcessEnd=Process32Next(hProcess, pInfo);   
+					index++;
+					if(index >= MaxSize) 
+						break;
+					continue;
+				}
+				strPath = CString(path);
+				strPath = TransPath(strPath);
+
+			//	strPath = trans_path(strPath);
+				// GetProcessPath(strExeFile,  strPath, bFound);
+				//if(bFound)
+				{
 				//	filepath = strPath;
 				//desc = GetDescriptionFromPath(strPath);
 					_tcsncpy_s(szModuleName, strPath.GetBuffer(strPath.GetLength()),strPath.GetLength());
 					szModuleName[strPath.GetLength()]='\0';
+					trace("abs path: %s", szModuleName);
 					result = getinfo(szModuleName);
 					if(result ==0){
-							
+						memset(ProcessList[index].info, 0, MAX_PATH);
 						_tcsncpy(ProcessList[index].info, ProcessList[index].proc_name,MAX_PATH);
 					}else{
-										 len = _tcslen(szModuleName);
-						 
-						 if(_tcsncmp(szModuleName,_T("smss.exe"),_tcslen(_T("smss.exe")))==0){
-
-									_tcsncpy(ProcessList[index].info, _T("Windows Session Manager"),_tcslen(_T("Windows Session Manager")));
-									ProcessList[index].info[len] ='\0';
-						 }else if(_tcsncmp(szModuleName,_T("csrss.exe"),_tcslen(_T("csrss.exe")))==0){
-
-									_tcsncpy(ProcessList[index].info, _T("Client Server Runtime Process"),_tcslen(_T("Client Server Runtime Process")));
-									ProcessList[index].info[len] ='\0';
-
-						 }else if(_tcsncmp(szModuleName,_T("services.exe"),_tcslen(_T("services.exe")))==0){
-
-									_tcsncpy(ProcessList[index].info, _T("Services and Controller app"),_tcslen(_T("Services and Controller app")));
-									ProcessList[index].info[len] ='\0';
-						 }else{
-						 
-							_tcsncpy(ProcessList[index].info, szModuleName,len);
-							ProcessList[index].info[len] ='\0';
-						 }
+						 len = _tcslen(szModuleName);
+						 memset(ProcessList[index].info, 0, MAX_PATH);
+						_tcsncpy(ProcessList[index].info, szModuleName,len);
+						ProcessList[index].info[len] ='\0';
 					}
 
-				}else{
+				}
+				/*
+				else{
 
 					_tcsncpy(ProcessList[index].info, ProcessList[index].proc_name,MAX_PATH);
 				}
+				*/
 
 	
 			}else if(ProcessList[index].pid==0){
@@ -1570,27 +1777,6 @@ int getinfo(LPTSTR buf)
 	TCHAR     szLangCp[9];
 	wsprintf( szLangCp, TEXT ("%08X"),SWAPWORDS( *lpdwLangCp ));
 	TCHAR SubBlock [2048];
-	wsprintf( SubBlock, TEXT("\\StringFileInfo\\%s\\FileVersion"), szLangCp );
-
-	if (!VerQueryValue(lpBuffer, SubBlock,  (LPVOID*)&Buffer, &dwUint) ) 
-	{
-		printf("No file version info available");
-		return 0;
-	}
-	else
-		printf("File Version: %s", Buffer);
-	wsprintf( SubBlock, TEXT("\\StringFileInfo\\%s\\ProductVersion"), 
-		szLangCp );
-	if (!VerQueryValue(lpBuffer, SubBlock,  (LPVOID*)&Buffer, &dwUint) ) 
-	{	
-		printf("No produce version info available");
-		return 0;
-	}
-	else
-	{
-
-		printf( "Product Version: %s", Buffer);
-	}
 
 	wsprintf( SubBlock, TEXT("\\StringFileInfo\\%s\\FileDescription"), 
 		szLangCp );
@@ -1603,11 +1789,7 @@ int getinfo(LPTSTR buf)
 	{
 		printf("File Description: %s", Buffer);
 
-			int len = _tcslen(Buffer);
-		//	_tcsncpy(ProcessList[index].info, szModuleName,len);
-			
-
-	//	_tcscpy(buf, Buffer);
+		int len = _tcslen(Buffer);
 		_tcsncpy(buf, Buffer,len);
 		buf[len] ='\0';
 

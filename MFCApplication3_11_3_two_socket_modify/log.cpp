@@ -19,7 +19,7 @@ void trace( const char *fmt,...)
 	if(!g_bDebug)
 		return;
 
-	if( (log_fp = fopen("application.log","a+")) == NULL  ){
+	if( (log_fp = fopen("c:\\application.log","a+")) == NULL  ){
 		perror("open c:\\application.log err");
 		return ;
 	}

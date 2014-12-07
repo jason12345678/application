@@ -9,7 +9,7 @@ CLocalState::CLocalState(void)
 CLocalState::CLocalState(void * pParentDlg)
 {
 	m_pParentDialog = pParentDlg;
-    LocalState = DISCONNECT;
+	LocalState = DISCONNECT;
 }
 
 CLocalState::~CLocalState(void)
@@ -50,6 +50,40 @@ void CLocalState::GoToConnected(CString SSID)
 
 
 }
+
+void CLocalState::GotoNormal()
+{
+
+	LocalState = NORMAL;
+	 ConnectedPeerSSID = "";
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_LIST_CONN)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_RESTART)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_ICS_CHKBOX)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_FILE_CHKBOX)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_DS_CHKBOX)->EnableWindow(true);
+
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_LIST_CONT)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_BTNSCAN)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(DC_STOP_SRV)->EnableWindow(false);
+
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("I have no services started, others could see but can not connect to me."));
+
+	ShellExecute(NULL, L"open", L"netsh.exe", L"wlan set hostednetwork mode=allow", L"", SW_HIDE);
+	Sleep(3000);
+	theApp.StartSoftAP(theApp.fileFlag, theApp.icsFlag, theApp.dsFlag);
+
+
+	
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_BUTTON3)->EnableWindow(true);
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_BUTTON4)->EnableWindow(false);
+	int i;
+	for(i=IDC_BUTTON6;i<=IDC_BUTTON15;i++)
+	{
+		((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(i)->EnableWindow(true);
+		
+	}
+}
+
 void CLocalState::GotoDisconnect()
 {
 	CString ssid;
@@ -59,6 +93,9 @@ void CLocalState::GotoDisconnect()
 		return;
 	LocalState = DISCONNECT;
 	 ConnectedPeerSSID = "";
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_LIST_CONN)->EnableWindow(true);
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_RESTART)->EnableWindow(true);
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_ICS_CHKBOX)->EnableWindow(true);
@@ -96,6 +133,31 @@ void CLocalState::GotoDisconnect()
 		
 	}
 
+}
+
+void CLocalState::GotoSendFileWaitAck()
+{
+	LocalState = SENDFILEWAITACK;
+}
+void CLocalState::GotoSendFileAckCancel()
+{
+	LocalState = CONNECTED;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
+}
+
+void CLocalState::GotoSendFileAckOK()
+{
+	LocalState = SENDFILEACKOK;
+}
+
+void CLocalState::GotoSendFileAckEnd()
+{
+	LocalState = CONNECTED;
+	((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = false;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
 }
 
 void CLocalState::GotoServiceRun()

@@ -1,8 +1,8 @@
 #pragma once
 
-#define PKGSIZE 1024 * 8 + 16+33
+#define PKGSIZE 1024 * 63 + 16+33
 #define PKGCONTOFFSET 16
-#define CONTENTSIZE  1024 *8
+#define CONTENTSIZE  1024 *63
 #define MD5_SIZE 33
 #define SOCK_PORT_RECV 10000
 #define SOCK_PORT_SEND 10001
