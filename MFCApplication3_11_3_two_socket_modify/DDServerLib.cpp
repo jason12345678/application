@@ -827,7 +827,24 @@ WFD_ERROR_CODE CWfdWlanSolution::RegisterNotificationFunc()
     return WFD_ERROR_SUCCESS;
 }
 
-
+WFD_ERROR_CODE CWfdWlanSolution::UnregisterNotificationFunc()
+{
+    DWORD dwPrevNotifType;
+    DWORD dwError;
+	if(ERROR_SUCCESS != (dwError = WlanRegisterNotification(
+					m_hWlanClient,
+					WLAN_NOTIFICATION_SOURCE_NONE, //WLAN_NOTIFICATION_SOURCE_ACM | WLAN_NOTIFICATION_SOURCE_MSM,
+					FALSE,			// do not ignore duplications
+					NULL,
+					(PVOID)this,
+					NULL,           // reserved
+					&dwPrevNotifType
+					)))
+	{
+		return WFD_ERROR_WLAN_REGISTER_MESSAGE_HANDLER_FAILED;
+	}   
+    return WFD_ERROR_SUCCESS;
+}
 
 
 VOID CWfdWlanSolution::NotificationCallback(
@@ -1218,6 +1235,7 @@ WFD_ERROR_CODE CWfdWlanSolution::HostedNetworkStartSoftAp(IN CString strSSID, IN
 
 WFD_ERROR_CODE CWfdWlanSolution::HostedNetworkStopSoftAp()
 {
+	UnregisterNotificationFunc();
     SetAtherosNICInfomationElement(false);
     WLAN_HOSTED_NETWORK_REASON dwFailedReason;
 	DWORD dwReturnValue;
