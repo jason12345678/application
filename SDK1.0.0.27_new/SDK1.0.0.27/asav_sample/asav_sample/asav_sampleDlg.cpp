@@ -378,9 +378,16 @@ BOOL Casav_sampleDlg::OnInitDialog()
 	err = m_smart_net->init(); // 0: AR816X LOM product 1: AR815X LOM product
 	if (err != ERROR_SUCCESS)
 	{
-		szErrMsg = get_error_msg(err);
-		// AfxMessageBox(szErrMsg);
-		AfxMessageBox(_T("需要的驱动文件丢失！"));
+		if (2 == err)
+		{
+			AfxMessageBox(_T("需要的驱动文件丢失！"));
+		}
+		else
+		{
+			szErrMsg = get_error_msg(err);
+			AfxMessageBox(szErrMsg);
+		}
+		// AfxMessageBox(_T("需要的驱动文件丢失！"));
 		PostQuitMessage(0);
 		return FALSE;
 	}
