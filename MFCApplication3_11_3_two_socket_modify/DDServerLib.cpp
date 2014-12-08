@@ -1235,7 +1235,6 @@ WFD_ERROR_CODE CWfdWlanSolution::HostedNetworkStartSoftAp(IN CString strSSID, IN
 
 WFD_ERROR_CODE CWfdWlanSolution::HostedNetworkStopSoftAp()
 {
-	UnregisterNotificationFunc();
     SetAtherosNICInfomationElement(false);
     WLAN_HOSTED_NETWORK_REASON dwFailedReason;
 	DWORD dwReturnValue;

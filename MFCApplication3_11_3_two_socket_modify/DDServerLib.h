@@ -241,12 +241,12 @@ public:
 	WFD_ERROR_CODE EnumVirtualAdapterInterfaceGUID();
 	WFD_ERROR_CODE getWlanAdapterGUID(char*);
 	WFD_ERROR_CODE getVirtualAdapterGUID(char*);
+	WFD_ERROR_CODE UnregisterNotificationFunc();
 
 private:
     // - tip functions - 
     WFD_ERROR_CODE CheckWlanHandle();   
     WFD_ERROR_CODE RegisterNotificationFunc();
-	WFD_ERROR_CODE UnregisterNotificationFunc();
     static VOID NotificationCallback(
 		__in PWLAN_NOTIFICATION_DATA pNotifData, 
 		__in_opt PVOID pContext

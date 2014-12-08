@@ -23,7 +23,7 @@ void CLocalState::GoToConnected(CString SSID)
 	if(LocalState ==  CONNECTED)
 		return;
     LocalState = CONNECTED;
-	
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_STATIC_HINT)->SetWindowTextW(_T("Connected."));
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_LIST_CONN)->EnableWindow(false);
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_RESTART)->EnableWindow(false);
 	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_BUTTON3)->EnableWindow(false);
@@ -93,6 +93,7 @@ void CLocalState::GotoDisconnect()
 		return;
 	LocalState = DISCONNECT;
 	 ConnectedPeerSSID = "";
+	 ((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_STATIC_HINT)->SetWindowTextW(_T("Disconnected"));
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = false;
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = false;
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
@@ -135,6 +136,21 @@ void CLocalState::GotoDisconnect()
 
 }
 
+void CLocalState::GotoReceivingFile()
+{
+	LocalState = RECEIVINGFILE;
+}
+
+void CLocalState::GotoReceiveFileCancel()
+{
+	LocalState = CONNECTED;
+}
+
+void CLocalState::GotoReceiveFileEnd()
+{
+	LocalState = CONNECTED;
+}
+
 void CLocalState::GotoSendFileWaitAck()
 {
 	LocalState = SENDFILEWAITACK;
@@ -147,6 +163,14 @@ void CLocalState::GotoSendFileAckCancel()
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
 }
 
+void CLocalState::GotoSendFileCancel()
+{
+	LocalState = SENDFILECANCEL;;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = true;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = true;
+	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = true;
+}
+
 void CLocalState::GotoSendFileAckOK()
 {
 	LocalState = SENDFILEACKOK;
@@ -155,6 +179,7 @@ void CLocalState::GotoSendFileAckOK()
 void CLocalState::GotoSendFileAckEnd()
 {
 	LocalState = CONNECTED;
+	((SmartSharingDlg *)m_pParentDialog)->GetDlgItem(IDC_STATIC_HINT)->SetWindowTextW(_T("Connected"));
 	((SmartSharingDlg *)m_pParentDialog)->is_send_file_flag = false;
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_client_cancel = false;
 	 ((SmartSharingDlg *)m_pParentDialog)->is_send_file_server_cancel = false;
