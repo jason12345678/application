@@ -116,6 +116,7 @@
 #define ID_LIST_DISCONNECT              32789
 #define ID_LIST_SENDFILECANCEL          32790
 #define ID_MENU_SENDFILECANCEL          32791
+#define ID_LIST_SCREENSHARING           3292
 
 // Next default values for new objects
 // 

@@ -36,6 +36,10 @@
 
 
 
+#define WINCAPSERVER        L"\\app_refs_ut_capserver.exe"
+#define WINPLAYER           L"\\app_refs_ut_simpleplayer.exe"
+#define WINCAPSERVERNAME    L"app_refs_ut_capserver.exe"
+#define WINPLAYERNAME       L"app_refs_ut_simpleplayer.exe"
 
 
 typedef struct _pkg
